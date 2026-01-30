@@ -1,3 +1,4 @@
+#pragma once
 #include "Ray.hpp"
 
 class HitRecord {
