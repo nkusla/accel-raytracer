@@ -1,5 +1,5 @@
 #include "Camera.hpp"
-#include "hash.hpp"
+#include "random.hpp"
 
 Camera::Camera(float aspect_ratio, int image_width, int msaa_samples)
 	: aspect_ratio(aspect_ratio),
@@ -43,4 +43,29 @@ vec2 Camera::getOffset(int i, int j, int sample) const {
 		random_float(i, j, sample, 0) - 0.5f,
 		random_float(i, j, sample, 1) - 0.5f
 	);
+}
+
+void Camera::render(const World& world, color* pixel_buffer) const {
+#ifdef _OPENMP
+	#pragma omp parallel for collapse(2)
+#endif
+	for (int j = 0; j < image_height; j++) {
+		for (int i = 0; i < image_width; i++) {
+			color pixel_color(0.0f, 0.0f, 0.0f);
+
+			for (int s = 0; s < msaa_samples; s++) {
+				Ray ray = getRay(i, j, s);
+
+				HitRecord hit_record;
+				if (world.hit(ray, 0.001, INFINITY_F, hit_record)) {
+					pixel_color += 0.5f * (hit_record.normal + ONE);
+				}
+				else {
+					pixel_color += world.getSkyboxColor(ray);
+				}
+			}
+
+			pixel_buffer[j * image_width + i] = pixel_color / float(msaa_samples);
+		}
+	}
 }

@@ -16,3 +16,4 @@ using vec2 = glm::vec2;
 #define FORWARD vec3(0.0f, 0.0f, 1.0f)
 
 constexpr float INFINITY_F = std::numeric_limits<float>::infinity();
+constexpr float PI = 3.1415926535897932385f;

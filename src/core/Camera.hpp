@@ -1,6 +1,10 @@
 #pragma once
 #include "types.hpp"
 #include "Ray.hpp"
+#include "World.hpp"
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 class Camera {
 public:
@@ -12,6 +16,8 @@ public:
 
 	Ray getRay(int i, int j, int sample) const;
 	vec2 getOffset(int i, int j, int sample) const;
+
+	void render(const World& world, color* pixel_buffer) const;
 
 private:
 	void initialize();
