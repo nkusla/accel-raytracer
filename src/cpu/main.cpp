@@ -16,7 +16,7 @@ color calc_ray_color(const Ray& ray, const World& world) {
 }
 
 int main() {
-	Camera camera(16.0f / 9.0f, 800);
+	Camera camera(16.0f / 9.0f, 800, 4);
 	World world;
 
 	world.add(std::make_shared<Sphere>(vec3(0.0f, 0.0f, -1.0f), 0.5f));
@@ -30,9 +30,15 @@ int main() {
 	for (int j = 0; j < image_height; j++) {
 		std::clog << "\rScanlines remaining: " << (image_height - j) << ' ' << std::flush;
 		for (int i = 0; i < image_width; i++) {
-			Ray ray = camera.getRay(i, j);
+			color pixel_color(0.0f, 0.0f, 0.0f);
 
-			color pixel_color = calc_ray_color(ray, world);
+			for (int s = 0; s < camera.getMSAA(); s++) {
+				Ray ray = camera.getRay(i, j, s);
+
+				pixel_color += calc_ray_color(ray, world);
+			}
+
+			pixel_color /= float(camera.getMSAA());
 			PPMWriter::write_color(std::cout, pixel_color);
 		}
 	}

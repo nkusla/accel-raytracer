@@ -4,16 +4,19 @@
 
 class Camera {
 public:
-	Camera(float aspect_ratio, int image_width);
+	Camera(float aspect_ratio, int image_width, int msaa_samples = 1);
 
 	int getImageWidth() const { return image_width; }
 	int getImageHeight() const { return image_height; }
+	int getMSAA() const { return msaa_samples; }
 
-	Ray getRay(int i, int j) const;
+	Ray getRay(int i, int j, int sample) const;
+	vec2 getOffset(int i, int j, int sample) const;
 
 private:
 	void initialize();
 
+	int msaa_samples;
 	int image_width;
 	int image_height;
 	float aspect_ratio;

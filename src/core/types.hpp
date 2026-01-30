@@ -6,6 +6,7 @@ using color = glm::vec3;
 #define WHITE color(1.0f, 1.0f, 1.0f)
 
 using vec3 = glm::vec3;
+using vec2 = glm::vec2;
 #define ZERO vec3(0.0f, 0.0f, 0.0f)
 #define ONE vec3(1.0f, 1.0f, 1.0f)
 #define UP vec3(0.0f, 1.0f, 0.0f)

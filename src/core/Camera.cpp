@@ -1,9 +1,11 @@
 #include "Camera.hpp"
+#include "hash.hpp"
 
-Camera::Camera(float aspect_ratio, int image_width)
+Camera::Camera(float aspect_ratio, int image_width, int msaa_samples)
 	: aspect_ratio(aspect_ratio),
 	image_width(image_width),
 	focal_length(1.0),
+	msaa_samples(msaa_samples),
 	camera_center(ZERO)
 {
 	initialize();
@@ -28,8 +30,17 @@ void Camera::initialize() {
 	viewport_origin = viewport_upper_left + 0.5f * (pixel_delta_u + pixel_delta_v);
 }
 
-Ray Camera::getRay(int i, int j) const {
-	auto pixel_center = viewport_origin + (float(i) * pixel_delta_u) + (float(j) * pixel_delta_v);
+Ray Camera::getRay(int i, int j, int sample) const {
+	auto offset = getOffset(i, j, sample);
+
+	auto pixel_center = viewport_origin + ((i + offset.x) * pixel_delta_u) + ((j + offset.y) * pixel_delta_v);
 	auto ray_direction = pixel_center - camera_center;
 	return Ray(camera_center, ray_direction);
+}
+
+vec2 Camera::getOffset(int i, int j, int sample) const {
+	return vec2(
+		random_float(i, j, sample, 0) - 0.5f,
+		random_float(i, j, sample, 1) - 0.5f
+	);
 }
