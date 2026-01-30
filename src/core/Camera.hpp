@@ -2,13 +2,14 @@
 #include "types.hpp"
 #include "Ray.hpp"
 #include "World.hpp"
+#include "RNGState.hpp"
 #ifdef _OPENMP
 #include <omp.h>
 #endif
 
 class Camera {
 public:
-	Camera(float aspect_ratio, int image_width, int msaa_samples = 1);
+	Camera(float aspect_ratio, int image_width, int msaa_samples = 1, int max_bounce = 8);
 
 	int getImageWidth() const { return image_width; }
 	int getImageHeight() const { return image_height; }
@@ -21,8 +22,10 @@ public:
 
 private:
 	void initialize();
+	color traceRay(const Ray& ray, const World& world, const RNGState& state) const;
 
 	int msaa_samples;
+	int max_bounce;
 	int image_width;
 	int image_height;
 	float aspect_ratio;

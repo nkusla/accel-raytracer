@@ -1,11 +1,12 @@
 #include "Camera.hpp"
 #include "random.hpp"
 
-Camera::Camera(float aspect_ratio, int image_width, int msaa_samples)
+Camera::Camera(float aspect_ratio, int image_width, int msaa_samples, int max_bounce)
 	: aspect_ratio(aspect_ratio),
 	image_width(image_width),
 	focal_length(1.0),
 	msaa_samples(msaa_samples),
+	max_bounce(max_bounce),
 	camera_center(ZERO)
 {
 	initialize();
@@ -39,10 +40,32 @@ Ray Camera::getRay(int i, int j, int sample) const {
 }
 
 vec2 Camera::getOffset(int i, int j, int sample) const {
+	RNGState state(i, j, sample, 0);
 	return vec2(
-		random_float(i, j, sample, 0) - 0.5f,
-		random_float(i, j, sample, 1) - 0.5f
+		random_float(state) - 0.5f,
+		random_float(state.next_bounce()) - 0.5f
 	);
+}
+
+color Camera::traceRay(const Ray& ray, const World& world, const RNGState& state) const {
+	color accumulated_color(0.0f, 0.0f, 0.0f);
+	color attenuation(1.0f, 1.0f, 1.0f);
+	Ray current_ray = ray;
+	HitRecord hit_record;
+
+	for (int bounce = 0; bounce < max_bounce; bounce++) {
+		if (world.hit(current_ray, 0.001f, INFINITY_F, hit_record)) {
+			vec3 rand_unit_vec = random_on_hemisphere_with_normal(state.next_bounce(), hit_record.normal);
+
+			attenuation *= 0.5f;
+			current_ray = Ray(hit_record.point, rand_unit_vec);
+		} else {
+			accumulated_color = attenuation * world.getSkyboxColor(current_ray);
+			break;
+		}
+	}
+
+	return accumulated_color;
 }
 
 void Camera::render(const World& world, color* pixel_buffer) const {
@@ -55,14 +78,9 @@ void Camera::render(const World& world, color* pixel_buffer) const {
 
 			for (int s = 0; s < msaa_samples; s++) {
 				Ray ray = getRay(i, j, s);
+				RNGState state(i, j, s, 0);
 
-				HitRecord hit_record;
-				if (world.hit(ray, 0.001, INFINITY_F, hit_record)) {
-					pixel_color += 0.5f * (hit_record.normal + ONE);
-				}
-				else {
-					pixel_color += world.getSkyboxColor(ray);
-				}
+				pixel_color += traceRay(ray, world, state);
 			}
 
 			pixel_buffer[j * image_width + i] = pixel_color / float(msaa_samples);

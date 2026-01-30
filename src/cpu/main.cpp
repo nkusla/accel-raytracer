@@ -17,6 +17,7 @@ int main() {
 
 	world.add(std::make_shared<Sphere>(vec3(0.0f, 0.0f, -1.0f), 0.5f));
 	world.add(std::make_shared<Sphere>(vec3(0.5f, 0.5f, -1.0f), 0.2f));
+	world.add(std::make_shared<Sphere>(vec3(0.0f, -100.5f, -1.0f), 100.0f));
 
 	int image_width = camera.getImageWidth();
 	int image_height = camera.getImageHeight();
