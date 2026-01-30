@@ -4,8 +4,8 @@
 
 #include <iostream>
 
-color ray_color(const Ray& r) {
-	vec3 unit_direction = glm::normalize(r.getDirection());
+color ray_color(const Ray& ray) {
+	vec3 unit_direction = glm::normalize(ray.direction);
 	float t = 0.5f * (unit_direction.y + 1.0f);
 	return glm::mix(WHITE, color(0.5f, 0.7f, 1.0f), t);
 }
