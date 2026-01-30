@@ -1,20 +1,32 @@
+#include "Camera.hpp"
 #include "PPMWriter.hpp"
-#include <glm/glm.hpp>
+#include "types.hpp"
+
+#include <iostream>
+
+color ray_color(const Ray& r) {
+	vec3 unit_direction = glm::normalize(r.getDirection());
+	float t = 0.5f * (unit_direction.y + 1.0f);
+	return glm::mix(WHITE, color(0.5f, 0.7f, 1.0f), t);
+}
 
 int main() {
-    int image_width = 512;
-    int image_height = 512;
+	Camera camera(16.0f / 9.0f, 800);
 
-    PPMWriter::write_header(std::cout, image_width, image_height);
-    for (int j = 0; j < image_height; j++) {
-        std::clog << "\rScanlines remaining: " << (image_height - j) << ' ' << std::flush;
-        for (int i = 0; i < image_width; i++) {
-            auto pixel_color = glm::vec3(float(i)/(image_width-1), float(j)/(image_height-1), 0);
-            PPMWriter::write_color(std::cout, pixel_color);
-        }
-    }
-    PPMWriter::write_footer(std::cout);
+	int image_width = camera.getImageWidth();
+	int image_height = camera.getImageHeight();
 
-    std::clog << "\rDone.                 \n";
-    return 0;
+	std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
+
+	for (int j = 0; j < image_height; j++) {
+		std::clog << "\rScanlines remaining: " << (image_height - j) << ' ' << std::flush;
+		for (int i = 0; i < image_width; i++) {
+			Ray ray = camera.getRay(i, j);
+
+			color pixel_color = ray_color(ray);
+			PPMWriter::write_color(std::cout, pixel_color);
+		}
+	}
+
+	std::clog << "\rDone.                 \n";
 }
