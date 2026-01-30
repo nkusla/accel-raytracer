@@ -10,5 +10,5 @@ private:
 public:
 	Sphere(const vec3& center, float radius);
 
-	bool hit(const Ray& ray, double t_min, double t_max) const override;
+	bool hit(const Ray& ray, float t_min, float t_max, HitRecord& hit_record) const override;
 };

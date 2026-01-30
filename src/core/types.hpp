@@ -13,3 +13,5 @@ using vec3 = glm::vec3;
 #define LEFT vec3(-1.0f, 0.0f, 0.0f)
 #define RIGHT vec3(1.0f, 0.0f, 0.0f)
 #define FORWARD vec3(0.0f, 0.0f, 1.0f)
+
+constexpr float INFINITY_F = std::numeric_limits<float>::infinity();
