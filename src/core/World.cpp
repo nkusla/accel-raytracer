@@ -4,8 +4,8 @@ bool World::hit(const Ray& ray, float t_min, float t_max, HitRecord& hit_record)
 	bool hit_anything = false;
 	float closest_t = t_max;
 
-	for (const auto& object : objects) {
-		if (object->hit(ray, t_min, closest_t, hit_record)) {
+	for (int i = 0; i < num_objects; i++) {
+		if (objects[i]->hit(ray, t_min, closest_t, hit_record)) {
 			hit_anything = true;
 			closest_t = hit_record.t;
 		}

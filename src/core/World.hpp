@@ -1,25 +1,38 @@
 #pragma once
-#include <vector>
-#include <memory>
 #include "IHittable.hpp"
+#include "cuda_compat.hpp"
 
 class World : public IHittable {
 private:
-	std::vector<std::shared_ptr<IHittable>> objects;
+	IHittable** objects;
+	int num_objects;
+	int capacity;
 	color skyboxColor;
 
 public:
-	World() : skyboxColor(color(0.5f, 0.7f, 1.0f)) {}
+	World() : objects(new IHittable*[8]), num_objects(0), capacity(8), skyboxColor(color(0.5f, 0.7f, 1.0f)) {}
 
-	void add(std::shared_ptr<IHittable> object) {
-		objects.push_back(object);
+	~World() {
+		delete[] objects;
 	}
 
-	const std::vector<std::shared_ptr<IHittable>>& getObjects() const {
-		return objects;
+	void add(IHittable* object) {
+		if (num_objects >= capacity) {
+			capacity = capacity * 2 + 1;
+			IHittable** new_objects = new IHittable*[capacity];
+			for (int i = 0; i < num_objects; i++) {
+				new_objects[i] = objects[i];
+			}
+			delete[] objects;
+			objects = new_objects;
+		}
+		objects[num_objects] = object;
+		num_objects++;
 	}
 
+	__device__
 	bool hit(const Ray& ray, float t_min, float t_max, HitRecord& hit_record) const override;
 
+	__device__
 	color getSkyboxColor(const Ray& ray) const;
 };

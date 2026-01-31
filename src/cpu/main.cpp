@@ -15,16 +15,16 @@ int main() {
 	Camera camera(16.0f / 9.0f, 800, 25);
 	World world;
 
-	auto material_ground = std::make_shared<Lambertian>(color(0.8, 0.8, 0.0));
-	auto material_center = std::make_shared<Lambertian>(color(0.1, 0.2, 0.5));
-	auto material_left = std::make_shared<Metal>(color(0.8, 0.8, 0.8));
-	auto material_right = std::make_shared<Metal>(color(0.8, 0.8, 0.8), 0.5f);
+	auto material_ground = new Lambertian(color(0.8, 0.8, 0.0));
+	auto material_center = new Lambertian(color(0.1, 0.2, 0.5));
+	auto material_left = new Metal(color(0.8, 0.8, 0.8));
+	auto material_right = new Metal(color(0.8, 0.8, 0.8), 0.5f);
 
 
-	world.add(std::make_shared<Sphere>(vec3( 0.0, -100.5, -1.0), 100.0, material_ground));
-	world.add(std::make_shared<Sphere>(vec3( 0.0, 0.0, -1.2), 0.5, material_center));
-	world.add(std::make_shared<Sphere>(vec3(-1.0, 0.0, -1.0), 0.5, material_left));
-	world.add(std::make_shared<Sphere>(vec3( 1.0, 0.0, -1.0), 0.5, material_right));
+	world.add(new Sphere(vec3( 0.0, -100.5, -1.0), 100.0, material_ground));
+	world.add(new Sphere(vec3( 0.0, 0.0, -1.2), 0.5, material_center));
+	world.add(new Sphere(vec3(-1.0, 0.0, -1.0), 0.5, material_left));
+	world.add(new Sphere(vec3( 1.0, 0.0, -1.0), 0.5, material_right));
 
 	int image_width = camera.getImageWidth();
 	int image_height = camera.getImageHeight();
@@ -46,6 +46,10 @@ int main() {
 	PPMWriter::write_color(std::cout, pixel_buffer, image_width, image_height);
 	PPMWriter::write_footer(std::cout);
 	delete[] pixel_buffer;
+	delete material_ground;
+	delete material_center;
+	delete material_left;
+	delete material_right;
 
 	std::clog << "\r\033[K" << "Rendering complete!" << std::endl;
 	std::clog << "Rendering time: " << duration.count() << " ms" << std::endl;
