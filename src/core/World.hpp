@@ -20,9 +20,11 @@ public:
 
 	__host__ __device__
 	~World() {
+		#ifndef __CUDACC__
 		if (capacity > 0 && num_spheres <= 8) {
 			delete[] spheres;
 		}
+		#endif
 	}
 
 	__host__

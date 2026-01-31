@@ -17,30 +17,28 @@
         } \
     } while(0)
 
-// Initialization kernels - construct objects directly on device
-__global__ void initMaterials(Material* mat_ground, Material* mat_center) {
+// Unified initialization kernel - construct all objects in one kernel
+__global__ void initScene(Material* mat_ground, Material* mat_center,
+                          Sphere* sphere_ground, Sphere* sphere_center,
+                          Sphere** spheres, World* world, Camera* camera,
+                          float aspect_ratio, int image_width, int msaa_samples, int max_bounce) {
     if (threadIdx.x == 0 && blockIdx.x == 0) {
+        // Initialize materials
         new (mat_ground) Material(color(0.8, 0.8, 0.0));
         new (mat_center) Material(color(0.1, 0.2, 0.5));
-    }
-}
 
-__global__ void initSpheres(Sphere* sphere_ground, Sphere* sphere_center,
-                            Material* mat_ground, Material* mat_center) {
-    if (threadIdx.x == 0 && blockIdx.x == 0) {
+        // Initialize spheres
         new (sphere_ground) Sphere(vec3(0.0, -100.5, -1.0), 100.0, mat_ground);
         new (sphere_center) Sphere(vec3(0.0, 0.0, -1.2), 0.5, mat_center);
-    }
-}
 
-__global__ void initWorld(World* world, Sphere** spheres, int num_spheres) {
-    if (threadIdx.x == 0 && blockIdx.x == 0) {
-        new (world) World(spheres, num_spheres, num_spheres);
-    }
-}
+        // Initialize sphere array
+        spheres[0] = sphere_ground;
+        spheres[1] = sphere_center;
 
-__global__ void initCamera(Camera* camera, float aspect_ratio, int image_width, int msaa_samples, int max_bounce) {
-    if (threadIdx.x == 0 && blockIdx.x == 0) {
+        // Initialize world
+        new (world) World(spheres, 2, 2);
+
+        // Initialize camera
         new (camera) Camera(aspect_ratio, image_width, msaa_samples, max_bounce);
     }
 }
@@ -54,48 +52,31 @@ int main() {
     int image_height = int(image_width / aspect_ratio);
     image_height = (image_height < 1) ? 1 : image_height;
 
-    // === Allocate materials on GPU ===
+    // === Allocate all scene objects on GPU ===
     Material* d_material_ground;
     Material* d_material_center;
     CUDA_CHECK(cudaMalloc(&d_material_ground, sizeof(Material)));
     CUDA_CHECK(cudaMalloc(&d_material_center, sizeof(Material)));
 
-    // Construct materials ON DEVICE (not copy from host!)
-    initMaterials<<<1, 1>>>(d_material_ground, d_material_center);
-    CUDA_CHECK(cudaGetLastError());
-    CUDA_CHECK(cudaDeviceSynchronize());
-
-    // === Allocate spheres on GPU ===
     Sphere* d_sphere_ground;
     Sphere* d_sphere_center;
     CUDA_CHECK(cudaMalloc(&d_sphere_ground, sizeof(Sphere)));
     CUDA_CHECK(cudaMalloc(&d_sphere_center, sizeof(Sphere)));
 
-    // Construct spheres ON DEVICE (not copy from host!)
-    initSpheres<<<1, 1>>>(d_sphere_ground, d_sphere_center, d_material_ground, d_material_center);
-    CUDA_CHECK(cudaGetLastError());
-    CUDA_CHECK(cudaDeviceSynchronize());
-
-    // === Create World on GPU ===
-    // First, create the spheres array on GPU
     Sphere** d_spheres;
     CUDA_CHECK(cudaMalloc(&d_spheres, 2 * sizeof(Sphere*)));
 
-    // Copy sphere pointers to the spheres array
-    Sphere* h_spheres[2] = { d_sphere_ground, d_sphere_center };
-    CUDA_CHECK(cudaMemcpy(d_spheres, h_spheres, 2 * sizeof(Sphere*), cudaMemcpyHostToDevice));
-
-    // Construct World ON DEVICE
     World* d_world;
     CUDA_CHECK(cudaMalloc(&d_world, sizeof(World)));
-    initWorld<<<1, 1>>>(d_world, d_spheres, 2);
-    CUDA_CHECK(cudaGetLastError());
-    CUDA_CHECK(cudaDeviceSynchronize());
 
-    // === Allocate and construct Camera on GPU ===
     Camera* d_camera;
     CUDA_CHECK(cudaMalloc(&d_camera, sizeof(Camera)));
-    initCamera<<<1, 1>>>(d_camera, aspect_ratio, image_width, msaa_samples, max_bounce);
+
+    // === Initialize entire scene with single kernel launch ===
+    initScene<<<1, 1>>>(d_material_ground, d_material_center,
+                        d_sphere_ground, d_sphere_center,
+                        d_spheres, d_world, d_camera,
+                        aspect_ratio, image_width, msaa_samples, max_bounce);
     CUDA_CHECK(cudaGetLastError());
     CUDA_CHECK(cudaDeviceSynchronize());
 
