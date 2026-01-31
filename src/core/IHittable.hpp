@@ -1,5 +1,7 @@
 #pragma once
 #include "Ray.hpp"
+#include <memory>
+#include "IMaterial.hpp"
 
 class HitRecord {
 public:
@@ -7,6 +9,7 @@ public:
 	vec3 normal;
 	float t;
 	bool front_face;
+	std::shared_ptr<IMaterial> material;
 
 	void set_face_normal(const Ray& ray, const vec3& unit_normal) {
 		front_face = glm::dot(ray.direction, unit_normal) < 0;

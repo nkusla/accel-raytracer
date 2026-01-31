@@ -4,7 +4,7 @@
 #include "types.hpp"
 #include "World.hpp"
 #include <iostream>
-#include <memory>
+#include "Materials.hpp"
 #include <chrono>
 #ifdef _OPENMP
 #include <omp.h>
@@ -12,12 +12,14 @@
 
 
 int main() {
-	Camera camera(16.0f / 9.0f, 800, 4);
+	Camera camera(16.0f / 9.0f, 800, 25);
 	World world;
 
-	world.add(std::make_shared<Sphere>(vec3(0.0f, 0.0f, -1.0f), 0.5f));
-	world.add(std::make_shared<Sphere>(vec3(0.5f, 0.5f, -1.0f), 0.2f));
-	world.add(std::make_shared<Sphere>(vec3(0.0f, -100.5f, -1.0f), 100.0f));
+	auto material_ground = std::make_shared<Lambertian>(color(0.8, 0.8, 0.0));
+	auto material_center = std::make_shared<Lambertian>(color(0.1, 0.2, 0.5));
+
+	world.add(std::make_shared<Sphere>(vec3( 0.0,-100.5,-1.0), 100.0, material_ground));
+	world.add(std::make_shared<Sphere>(vec3( 0.0,0.0,-1.2), 0.5, material_center));
 
 	int image_width = camera.getImageWidth();
 	int image_height = camera.getImageHeight();

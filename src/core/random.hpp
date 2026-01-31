@@ -26,7 +26,7 @@ inline vec3 random_vec3(const RNGState& state) {
 	return vec3(random_float(state), random_float(state), random_float(state));
 }
 
-inline vec3 random_on_hemisphere(const RNGState& state) {
+inline vec3 random_on_hemisphere(RNGState& state) {
 	float u = random_float(state);
 	float v = random_float(state.next_bounce());
 	float phi = 2.0f * PI * u;
@@ -35,7 +35,7 @@ inline vec3 random_on_hemisphere(const RNGState& state) {
 	return vec3(glm::cos(phi) * sin_theta, glm::sin(phi) * sin_theta, cos_theta);
 }
 
-inline vec3 random_on_hemisphere_with_normal(const RNGState& state, const vec3& normal) {
+inline vec3 random_on_hemisphere_with_normal(RNGState& state, const vec3& normal) {
 	vec3 rand_unit_vec = glm::normalize(random_on_hemisphere(state));
 	return glm::dot(rand_unit_vec, normal) > 0 ? rand_unit_vec : -rand_unit_vec;
 }

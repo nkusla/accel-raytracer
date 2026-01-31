@@ -47,7 +47,7 @@ vec2 Camera::getOffset(int i, int j, int sample) const {
 	);
 }
 
-color Camera::traceRay(const Ray& ray, const World& world, const RNGState& state) const {
+color Camera::traceRay(const Ray& ray, const World& world, RNGState& state) const {
 	color accumulated_color(0.0f, 0.0f, 0.0f);
 	color attenuation(1.0f, 1.0f, 1.0f);
 	Ray current_ray = ray;
@@ -55,17 +55,21 @@ color Camera::traceRay(const Ray& ray, const World& world, const RNGState& state
 
 	for (int bounce = 0; bounce < max_bounce; bounce++) {
 		if (world.hit(current_ray, 0.001f, INFINITY_F, hit_record)) {
-			vec3 rand_unit_vec = random_on_hemisphere_with_normal(state.next_bounce(), hit_record.normal);
-
-			attenuation *= 0.5f;
-			current_ray = Ray(hit_record.point, rand_unit_vec);
+			Ray scattered;
+			color scattered_attenuation;
+			state = state.next_bounce();
+			if(hit_record.material->scatter(current_ray, hit_record, scattered_attenuation, state, scattered)) {
+				current_ray = scattered;
+				attenuation *= scattered_attenuation;
+			}
+			else {
+				return attenuation * world.getSkyboxColor(current_ray);
+			}
 		} else {
-			accumulated_color = attenuation * world.getSkyboxColor(current_ray);
-			break;
+			return attenuation * world.getSkyboxColor(current_ray);
 		}
 	}
-
-	return accumulated_color;
+	return BLACK;
 }
 
 void Camera::render(const World& world, color* pixel_buffer) const {

@@ -22,7 +22,7 @@ public:
 
 private:
 	void initialize();
-	color traceRay(const Ray& ray, const World& world, const RNGState& state) const;
+	color traceRay(const Ray& ray, const World& world, RNGState& state) const;
 
 	int msaa_samples;
 	int max_bounce;
