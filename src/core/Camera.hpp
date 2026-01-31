@@ -3,6 +3,8 @@
 #include "Ray.hpp"
 #include "World.hpp"
 #include "RNGState.hpp"
+#include "random.hpp"
+#include "HitRecord.hpp"
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -34,51 +36,14 @@ public:
 	vec2 getOffset(int i, int j, int sample) const;
 
 	__host__ __device__
-	inline color traceRay(const Ray& ray, const World* world, RNGState& state) const {
-		color attenuation(1.0f, 1.0f, 1.0f);
-		Ray current_ray = ray;
-		HitRecord hit_record;
-
-		for (int bounce = 0; bounce < max_bounce; bounce++) {
-			if (world->hit(current_ray, 0.001f, INFINITY_F, hit_record)) {
-				Ray scattered;
-				color scattered_attenuation;
-				if(hit_record.material->scatter(current_ray, hit_record, scattered_attenuation, state.next_bounce(), scattered)) {
-					current_ray = scattered;
-					attenuation *= scattered_attenuation;
-				}
-				else {
-					return attenuation * world->getSkyboxColor(current_ray);
-				}
-			} else {
-				return attenuation * world->getSkyboxColor(current_ray);
-			}
-		}
-		return BLACK;
-	}
+	color traceRay(const Ray& ray, const World* world, RNGState& state) const;
 
 	__host__
 	void render(const World& world, color* pixel_buffer) const;
 
 private:
 	__host__ __device__
-	void initialize() {
-		image_height = int(image_width / aspect_ratio);
-		image_height = (image_height < 1) ? 1 : image_height;
-
-		viewport_height = 2.0;
-		viewport_width = viewport_height * (float(image_width) / float(image_height));
-
-		viewport_u = vec3(viewport_width, 0, 0);
-		viewport_v = vec3(0, -viewport_height, 0);
-
-		pixel_delta_u = viewport_u / float(image_width);
-		pixel_delta_v = viewport_v / float(image_height);
-
-		auto viewport_upper_left = camera_center
-								 - vec3(0.0f, 0.0f, focal_length) - viewport_u / 2.0f - viewport_v / 2.0f;
-		viewport_origin = viewport_upper_left + 0.5f * (pixel_delta_u + pixel_delta_v);
-	}
+	void initialize();
 
 	int msaa_samples;
 	int max_bounce;
@@ -104,5 +69,4 @@ private:
 	#endif
 };
 
-// CUDA kernel declaration (defined in Camera.cpp)
 __global__ void renderKernel(Camera* camera, World* world, color* pixel_buffer, int image_width, int image_height, int msaa_samples);

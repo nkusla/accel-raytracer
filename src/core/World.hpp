@@ -1,66 +1,36 @@
 #pragma once
-#include "IHittable.hpp"
+#include "Sphere.hpp"
 #include "cuda_compat.hpp"
+#include "HitRecord.hpp"
 
-class World {  // Removed: public IHittable
+class World {
 private:
-	IHittable** objects;
-	int num_objects;
+	Sphere** spheres;
+	int num_spheres;
 	int capacity;
 	color skyboxColor;
 
 public:
-	World() : objects(new IHittable*[8]), num_objects(0), capacity(8), skyboxColor(color(0.5f, 0.7f, 1.0f)) {}
+	World() : spheres(new Sphere*[8]), num_spheres(0), capacity(8), skyboxColor(color(0.5f, 0.7f, 1.0f)) {}
 
 	// GPU-friendly constructor: takes pre-allocated device array
 	__host__ __device__
-	World(IHittable** objects_array, int num_objects, int capacity)
-		: objects(objects_array), num_objects(num_objects), capacity(capacity), skyboxColor(color(0.5f, 0.7f, 1.0f)) {}
+	World(Sphere** spheres_array, int num_spheres, int capacity)
+		: spheres(spheres_array), num_spheres(num_spheres), capacity(capacity), skyboxColor(color(0.5f, 0.7f, 1.0f)) {}
 
-	// Destructor - only delete if on host and we allocated it
+	__host__ __device__
 	~World() {
-		// Don't delete if using pre-allocated device array
-		// This is a host-only operation anyway
-#ifndef __CUDA_ARCH__
-		if (capacity > 0 && num_objects <= 8) {  // Only if we allocated it in default constructor
-			delete[] objects;
+		if (capacity > 0 && num_spheres <= 8) {
+			delete[] spheres;
 		}
-#endif
 	}
 
-	void add(IHittable* object) {
-		if (num_objects >= capacity) {
-			capacity = capacity * 2 + 1;
-			IHittable** new_objects = new IHittable*[capacity];
-			for (int i = 0; i < num_objects; i++) {
-				new_objects[i] = objects[i];
-			}
-			delete[] objects;
-			objects = new_objects;
-		}
-		objects[num_objects] = object;
-		num_objects++;
-	}
+	__host__
+	void add(Sphere* sphere);
 
 	__host__ __device__
-	inline bool hit(const Ray& ray, float t_min, float t_max, HitRecord& hit_record) const {
-		bool hit_anything = false;
-		float closest_t = t_max;
-
-		for (int i = 0; i < num_objects; i++) {
-			if (objects[i]->hit(ray, t_min, closest_t, hit_record)) {
-				hit_anything = true;
-				closest_t = hit_record.t;
-			}
-		}
-
-		return hit_anything;
-	}
+	bool hit(const Ray& ray, float t_min, float t_max, HitRecord& hit_record) const;
 
 	__host__ __device__
-	inline color getSkyboxColor(const Ray& ray) const {
-		vec3 unit_direction = glm::normalize(ray.direction);
-		float t = 0.5f * (unit_direction.y + 1.0f);
-		return glm::mix(WHITE, skyboxColor, t);
-	}
+	color getSkyboxColor(const Ray& ray) const;
 };

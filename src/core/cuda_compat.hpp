@@ -21,4 +21,5 @@
 #define __forceinline__ inline
 #endif
 
+#include <cstdio>
 #include <glm/glm.hpp>

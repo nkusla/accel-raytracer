@@ -1,7 +1,16 @@
 #pragma once
+#include "types.hpp"
 #include "Ray.hpp"
-#include "IMaterial.hpp"
 #include "cuda_compat.hpp"
+
+
+class Material {
+public:
+	color albedo;
+
+	__host__ __device__
+	Material(const color& albedo) : albedo(albedo) {}
+};
 
 class HitRecord {
 public:
@@ -9,20 +18,11 @@ public:
 	vec3 normal;
 	float t;
 	bool front_face;
-	IMaterial* material;
+	Material* material;
 
 	__host__ __device__
 	void set_face_normal(const Ray& ray, const vec3& unit_normal) {
 		front_face = glm::dot(ray.direction, unit_normal) < 0;
 		normal = front_face ? unit_normal : -unit_normal;
 	}
-};
-
-class IHittable {
-public:
-	__host__ __device__
-	virtual ~IHittable() = default;
-
-	__host__ __device__
-	virtual bool hit(const Ray& ray, float t_min, float t_max, HitRecord& hit_record) const = 0;
 };
