@@ -3,17 +3,9 @@
 #include "Ray.hpp"
 #include "cuda_compat.hpp"
 
+class Material;
 
-class Material {
-public:
-	color albedo;
-
-	__host__ __device__
-	Material(const color& albedo) : albedo(albedo) {}
-};
-
-class HitRecord {
-public:
+struct HitRecord {
 	vec3 point;
 	vec3 normal;
 	float t;

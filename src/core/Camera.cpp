@@ -1,5 +1,6 @@
 #include "cuda_compat.hpp"
 #include "Camera.hpp"
+#include "Materials.hpp"
 #include "random.hpp"
 #include <cstdio>
 
@@ -48,9 +49,15 @@ color Camera::traceRay(const Ray& ray, const World* world, RNGState& state) cons
 
 	for (int bounce = 0; bounce < max_bounce; bounce++) {
 		if (world->hit(current_ray, 0.001f, INFINITY_F, hit_record)) {
-			auto scatter_direction = hit_record.normal + random_on_hemisphere_with_normal(state, hit_record.normal);
-			current_ray = Ray(hit_record.point, scatter_direction);
-			attenuation *= hit_record.material->albedo;
+			Ray scattered;
+			color scattered_attenuation;
+			if(hit_record.material->scatter(current_ray, hit_record, scattered_attenuation, state.next_bounce(), scattered)) {
+				current_ray = scattered;
+				attenuation *= scattered_attenuation;
+			}
+			else {
+				return attenuation * world->getSkyboxColor(current_ray);
+			}
 		} else {
 			return attenuation * world->getSkyboxColor(current_ray);
 		}
