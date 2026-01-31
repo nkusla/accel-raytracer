@@ -10,6 +10,7 @@ class Lambertian : public IMaterial {
 private:
 	color albedo;
 public:
+	__host__ __device__
 	Lambertian(const color& albedo) : albedo(albedo) {}
 
 	__host__ __device__
@@ -26,6 +27,7 @@ private:
 	color albedo;
 	float fuzz;
 public:
+	__host__ __device__
 	Metal(const color& albedo, float fuzz = 0.0f) : albedo(albedo), fuzz(fuzz) {}
 
 	__host__ __device__

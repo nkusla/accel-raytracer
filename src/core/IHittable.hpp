@@ -20,6 +20,7 @@ public:
 
 class IHittable {
 public:
+	__host__ __device__
 	virtual ~IHittable() = default;
 
 	__host__ __device__

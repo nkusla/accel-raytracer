@@ -8,6 +8,7 @@ class HitRecord;
 
 class IMaterial {
 public:
+	__host__ __device__
 	virtual ~IMaterial() = default;
 
 	__host__ __device__
