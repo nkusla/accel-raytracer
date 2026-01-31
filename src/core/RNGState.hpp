@@ -9,8 +9,8 @@ struct RNGState {
 	RNGState(int x, int y, int s, int b = 0)
 		: x(x), y(y), sample(s), bounce(b) {}
 
-	RNGState next_bounce() {
+	RNGState& next_bounce() {
 		bounce++;
-		return RNGState(x, y, sample, bounce);
+		return *this;
 	}
 };

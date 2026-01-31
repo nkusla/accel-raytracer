@@ -57,8 +57,7 @@ color Camera::traceRay(const Ray& ray, const World& world, RNGState& state) cons
 		if (world.hit(current_ray, 0.001f, INFINITY_F, hit_record)) {
 			Ray scattered;
 			color scattered_attenuation;
-			state = state.next_bounce();
-			if(hit_record.material->scatter(current_ray, hit_record, scattered_attenuation, state, scattered)) {
+			if(hit_record.material->scatter(current_ray, hit_record, scattered_attenuation, state.next_bounce(), scattered)) {
 				current_ray = scattered;
 				attenuation *= scattered_attenuation;
 			}
