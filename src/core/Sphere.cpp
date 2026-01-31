@@ -1,7 +1,7 @@
 #include "Sphere.hpp"
 
 __host__ __device__
-bool Sphere::hit(const Ray& ray, float t_min, float t_max, HitRecord& hit_record) const {
+bool Sphere::hit(const Ray& ray, float t_min, float t_max, HitRecord& hit_record) {
 	vec3 oc = ray.origin - center;
 	auto a = glm::dot(ray.direction, ray.direction);
 	auto half_b = glm::dot(oc, ray.direction);
@@ -19,7 +19,7 @@ bool Sphere::hit(const Ray& ray, float t_min, float t_max, HitRecord& hit_record
 	hit_record.point = ray.at(hit_record.t);
 	vec3 outward_normal = (hit_record.point - center) / radius;
 	hit_record.set_face_normal(ray, outward_normal);
-	hit_record.material = material;
+	hit_record.material = &material;
 
 	return true;
 }
