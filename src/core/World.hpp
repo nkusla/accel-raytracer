@@ -30,9 +30,9 @@ public:
 		num_objects++;
 	}
 
-	__device__
+	__host__ __device__
 	bool hit(const Ray& ray, float t_min, float t_max, HitRecord& hit_record) const override;
 
-	__device__
+	__host__ __device__
 	color getSkyboxColor(const Ray& ray) const;
 };

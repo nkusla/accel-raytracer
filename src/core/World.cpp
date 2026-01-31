@@ -1,5 +1,6 @@
 #include "World.hpp"
 
+__host__ __device__
 bool World::hit(const Ray& ray, float t_min, float t_max, HitRecord& hit_record) const {
 	bool hit_anything = false;
 	float closest_t = t_max;
@@ -14,6 +15,7 @@ bool World::hit(const Ray& ray, float t_min, float t_max, HitRecord& hit_record)
 	return hit_anything;
 }
 
+__host__ __device__
 color World::getSkyboxColor(const Ray& ray) const {
 	vec3 unit_direction = glm::normalize(ray.direction);
 	float t = 0.5f * (unit_direction.y + 1.0f);

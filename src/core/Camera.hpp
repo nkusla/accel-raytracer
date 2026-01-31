@@ -15,9 +15,12 @@ public:
 	int getImageHeight() const { return image_height; }
 	int getMSAA() const { return msaa_samples; }
 
+	__device__
 	Ray getRay(int i, int j, int sample) const;
+	__device__
 	vec2 getOffset(int i, int j, int sample) const;
 
+	__device__
 	void render(const World& world, color* pixel_buffer) const;
 
 private:

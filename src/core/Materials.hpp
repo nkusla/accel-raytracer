@@ -4,6 +4,7 @@
 #include "types.hpp"
 #include "random.hpp"
 #include "IHittable.hpp"
+#include "cuda_compat.hpp"
 
 class Lambertian : public IMaterial {
 private:
@@ -11,6 +12,7 @@ private:
 public:
 	Lambertian(const color& albedo) : albedo(albedo) {}
 
+	__host__ __device__
 	bool scatter(const Ray& ray, const HitRecord& hit_record, color& attenuation, RNGState& state, Ray& scattered) const override {
 		auto scatter_direction = hit_record.normal + random_on_hemisphere_with_normal(state, hit_record.normal);
 		scattered = Ray(hit_record.point, scatter_direction);
@@ -26,6 +28,7 @@ private:
 public:
 	Metal(const color& albedo, float fuzz = 0.0f) : albedo(albedo), fuzz(fuzz) {}
 
+	__host__ __device__
 	bool scatter(const Ray& ray, const HitRecord& hit_record, color& attenuation, RNGState& state, Ray& scattered) const override {
 		auto reflected = glm::normalize(glm::reflect(ray.direction, hit_record.normal));
 		reflected += fuzz * random_on_hemisphere(state.next_bounce());

@@ -39,6 +39,7 @@ Ray Camera::getRay(int i, int j, int sample) const {
 	return Ray(camera_center, ray_direction);
 }
 
+__device__
 vec2 Camera::getOffset(int i, int j, int sample) const {
 	RNGState state(i, j, sample, 0);
 	return vec2(
@@ -47,6 +48,7 @@ vec2 Camera::getOffset(int i, int j, int sample) const {
 	);
 }
 
+__device__
 color Camera::traceRay(const Ray& ray, const World& world, RNGState& state) const {
 	color accumulated_color(0.0f, 0.0f, 0.0f);
 	color attenuation(1.0f, 1.0f, 1.0f);
@@ -71,6 +73,7 @@ color Camera::traceRay(const Ray& ray, const World& world, RNGState& state) cons
 	return BLACK;
 }
 
+__host__
 void Camera::render(const World& world, color* pixel_buffer) const {
 #ifdef _OPENMP
 	#pragma omp parallel for collapse(2)

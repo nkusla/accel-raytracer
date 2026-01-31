@@ -4,6 +4,7 @@
 Sphere::Sphere(const vec3& center, float radius, IMaterial* material)
 	: center(center), radius(glm::max(0.0f, radius)), material(material) {}
 
+__host__ __device__
 bool Sphere::hit(const Ray& ray, float t_min, float t_max, HitRecord& hit_record) const {
 	vec3 oc = ray.origin - center;
 	auto a = glm::dot(ray.direction, ray.direction);

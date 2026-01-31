@@ -1,5 +1,5 @@
 #pragma once
-#include <glm/glm.hpp>
+#include "cuda_compat.hpp"
 
 using color = glm::vec3;
 #define BLACK color(0.0f, 0.0f, 0.0f)
