@@ -28,14 +28,16 @@ __global__ void initScene(
 		Material mat_center = Material::make_lambertian(color(0.1, 0.2, 0.5));
 		Material mat_left = Material::make_metal(color(0.8, 0.8, 0.8), 0.0);
 		Material mat_right = Material::make_metal(color(0.8, 0.8, 0.8), 0.4);
+		Material mat_front = Material::make_metal(color(0.8, 0.0, 0.0), 0.0);
 
 		// Initialize spheres
-		spheres[0] = new Sphere(vec3(0.0, -100.5, -1.0), 100.0, mat_ground);
-		spheres[1] = new Sphere(vec3(0.0, 0.0, -1.2), 0.5, mat_center);
+		spheres[0] = new Sphere(vec3(0.0, -100.5, -1.5), 100.0, mat_ground);
+		spheres[1] = new Sphere(vec3(0.0, 0.0, -1.7), 0.5, mat_center);
 		spheres[2] = new Sphere(vec3(-1.0, 0.0, -1.0), 0.5, mat_left);
 		spheres[3] = new Sphere(vec3( 1.0, 0.0, -1.0), 0.5, mat_right);
+		spheres[4] = new Sphere(vec3( 0.0, -0.3, -1.0), 0.2, mat_front);
 
-		new (world) World(spheres, 4, 4);
+		new (world) World(spheres, 5, 5);
 
 		new (camera) Camera(aspect_ratio, image_width, msaa_samples, max_bounce);
 	}

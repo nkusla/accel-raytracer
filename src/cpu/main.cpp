@@ -19,11 +19,13 @@ int main() {
 	auto material_center = Material::make_lambertian(color(0.1, 0.2, 0.5));
 	auto material_left = Material::make_metal(color(0.8, 0.8, 0.8), 0.0);
 	auto material_right = Material::make_metal(color(0.8, 0.8, 0.8), 0.4);
+	auto material_front = Material::make_metal(color(0.8, 0.0, 0.0), 0.0);
 
-	world.add(new Sphere(vec3( 0.0, -100.5, -1.0), 100.0, material_ground));
-	world.add(new Sphere(vec3( 0.0, 0.0, -1.2), 0.5, material_center));
+	world.add(new Sphere(vec3( 0.0, -100.5, -1.5), 100.0, material_ground));
+	world.add(new Sphere(vec3( 0.0, 0.0, -1.7), 0.5, material_center));
 	world.add(new Sphere(vec3(-1.0, 0.0, -1.0), 0.5, material_left));
 	world.add(new Sphere(vec3( 1.0, 0.0, -1.0), 0.5, material_right));
+	world.add(new Sphere(vec3( 0.0, -0.3, -1.0), 0.2, material_front));
 
 	int image_width = camera.getImageWidth();
 	int image_height = camera.getImageHeight();

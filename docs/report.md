@@ -1,6 +1,6 @@
 ---
-title: "Ubrzavanje algoritma za praćenje zraka"
-author: "Nikola Kuslaković E2 121/2025"
+title: "Ubrzavanje algoritma za praćenje zraka u računarskoj grafici"
+author: "Nikola Kušlaković E2 121/2025"
 abstract: "U ovom radu se razmatra ubrzanje algoritma za praćenje zraka koristeći CUDA i OpenMP."
 date: "30.01.2026."
 toc: true
@@ -13,7 +13,43 @@ header-includes: |
   \renewcommand{\abstractname}{Sažetak}
   \renewcommand{\figurename}{Slika}
   \renewcommand{\tablename}{Tabela}
-
+  \usepackage{setspace}
+  \onehalfspacing
+  \usepackage{xcolor}
+  \usepackage{mdframed}
+  \usepackage{caption}
+  \definecolor{bgcolor}{RGB}{240,240,240}
+  \BeforeBeginEnvironment{Highlighting}{\begin{mdframed}[backgroundcolor=bgcolor, linewidth=1pt, innerleftmargin=5pt, innerrightmargin=5pt, innertopmargin=5pt, innerbottommargin=5pt]}
+  \AfterEndEnvironment{Highlighting}{\end{mdframed}}
+  \makeatletter
+  \def\@maketitle{%
+    \newpage
+    \null
+    \vspace*{\fill}
+    \begin{center}%
+    \let \footnote \thanks
+      {\LARGE Fakultet tehničkih nauka}%
+      \vskip 0.25em%
+      {\normalsize Univerzitet u Novom Sadu}%
+      \vskip 2em%
+      {\normalsize Računarski sistemi visokih performansi}%
+      \vskip 2em%
+      {\huge \bfseries \@title \par}%
+      \vskip 10.0em%
+      {\large
+        \lineskip .5em%
+        \begin{tabular}[t]{c}%
+          \@author
+        \end{tabular}\par}%
+      \vskip 1em%
+      {\large \@date}%
+    \end{center}%
+    \vspace*{\fill}
+    \par
+    \newpage}
+  \makeatother
+  \let\oldtoc\tableofcontents
+  \renewcommand{\tableofcontents}{\newpage\oldtoc\newpage}
 ---
 
 \newpage
@@ -76,13 +112,48 @@ Projekat je organizovan u tri glavna modula:
 
 ## Dizajn CORE modula
 
-Pošto je bilo potrebno napraviti **CORE** modul višeplatformskim, bilo je potrebno pisati metode i klase na pametan način tako da one mogu da se prevedu i izvršavaju na GPU-u. Bitna ograničenja su bila seledeća:
+Pošto je bilo potrebno napraviti CORE modul višeplatformskim, bilo je potrebno pisati metode i klase na pametan način tako da one mogu da se prevedu i izvršavaju na i na procesoru i na grafičkoj kartici. Bitna ograničenja su bila seledeća:
 
 1. Izbegavanje korišćenja rekurzije zbog relativno plitkog steka koji je dostupan nitima na grafičkoj kartici
 2. Izbegavanje korišćenja polimorfizma i virtualnih metoda jer ovo najčešće nije dovoljno dobro podržano i optimizovano da se izvršava na grafičkoj kartici
-3. Izbegavanje korišćenja `std::vector`, `std::map` i `std::shared_ptr` sličnih kolekcija iz standardne biblioteke C++ pošto ih standardna biblioteka CUDA ne implementira
+3. Izbegavanje korišćenja `std::vector`, `std::map` i `std::shared_ptr` sličnih kolekcija iz standardne C++ biblioteke pošto ih standardna biblioteka CUDA ne implementira
 
 Ograničenje 1. je prevaziđeno prevođenjem rekurzije u iterativno izvršavanje, dok je ograničenje 2. rešeno korišćenjem ugrađenog tipa `union`. Što se tiče ograničenja 3., korišćeni su čisti pokazivači na objekte i njihovi tipovi su bili fiksni i poznati u vremenu prevođenja.
+
+GLM biblioteka je kompatibilna sa CUDA radnim okvirom, tako da je moguće prevesti je korišćenjem nvcc kompajlera (NVIDIA CUDA Compiler). Kompatibilnost sa CUDA okvirom urađen je kroz sledeću `hpp` datoteku unutar CORE modula:
+
+\
+
+```cpp
+// cuda_compat.hpp
+#pragma once
+
+// CUDA support: include cuda.h first to define CUDA_VERSION for GLM
+#ifdef __CUDACC__
+#include <cuda.h>
+#include <cuda_runtime.h>
+
+// Define GLM settings for CUDA compatibility
+#ifndef GLM_FORCE_CUDA
+#define GLM_FORCE_CUDA
+#endif
+#ifndef GLM_FORCE_PURE
+#define GLM_FORCE_PURE
+#endif
+
+#else
+// Non-CUDA builds: provide compatible macros
+#define __device__
+#define __host__
+#define __global__
+#define __forceinline__ inline
+#endif
+
+#include <glm/glm.hpp>
+```
+
+\captionof{lstlisting}{Code snippet 1: GLM CUDA compatibility header}
+
 
 # Rezultati i diskusija
 
