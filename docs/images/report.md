@@ -354,19 +354,13 @@ U tabelama 1 do 6 su prikazani rezultati izvršavanja programa za određenu komb
 
 ## Kvalitet slika
 
-Slike od 3 do 6 pokazuju kako se menja kvalitet kada se menja broj zraka po pikselu (*samples*).
+Slike generisane za različit broj zraka po pikselu prikazane su.
 
-![samples=10](images/w800_s10_b16.png){width=75%}
 
-![samples=100](images/w800_s100_b16.png){width=75%}
 
-![samples=1000](images/w800_s1000_b16.png){width=75%}
+### Diskusija rezultata
 
-![samples=10000](images/w800_s10000_b16.png){width=75%}
-
-## Diskusija rezultata
-
-Vidimo da je sekvencijalna CPU implementacija bila izuzetno spora (red veličine desetine sekundi), paralelna CPU implementacija (koristeći OpenMP) bila znatno brža, a GPU implementacija (koristeći CUDA okvir) je bila najbrža. Kod GPU implementacije, pri vremenima izvršavanja kraćim od 33 ms, moguće je postići renderovanje u realnom vremenu sa učestalošću od 30 sličica u sekundi (*FPS*). Ipak, vizuelni kvalitet tako generisanih slika je nezadovoljavajući, što je direktna posledica redukovanog broja uzoraka po pikselu i ograničenog broja odbijanja zraka radi postizanja visokih performansi. Kada je broj zraka po pikselu veći od 1000, kvalitet slika je veoma dobar i šum se značajno smanjuje.
+Vidimo da je sekvencijalna CPU implementacija bila izuzetno spora (red veličine desetine sekundi), paralelna CPU implementacija (koristeći OpenMP) bila znatno brža, a GPU implementacija (koristeći CUDA okvir) je bila najbrža. Kod GPU implementacije, pri vremenima izvršavanja kraćim od 33 ms, moguće je postići renderovanje u realnom vremenu sa učestalošću od 30 sličica u sekundi (*FPS*). Ipak, vizuelni kvalitet tako generisanih slika je nezadovoljavajući, što je direktna posledica redukovanog broja uzoraka po pikselu i ograničenog broja odbijanja zraka radi postizanja visokih performansi.
 
 # Zaključak
 
