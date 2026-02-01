@@ -43,11 +43,24 @@ __global__ void initScene(
 	}
 }
 
-int main() {
-	float aspect_ratio = 16.0f / 9.0f;
+int main(int argc, char* argv[]) {
 	int image_width = 800;
-	int msaa_samples = 25;
+	int samples = 25;
 	int max_bounce = 8;
+
+	if (argc != 4) {
+		std::clog << "Usage: " << argv[0] << " <image_width>" << " <samples>" << " <max_bounce>" << std::endl;
+		std::clog << "Defaulting to image_width = 800" << std::endl;
+		std::clog << "Defaulting to samples = 25" << std::endl;
+		std::clog << "Defaulting to max_bounce = 8" << std::endl;
+	} else {
+		image_width = std::stoi(argv[1]);
+		samples = std::stoi(argv[2]);
+		max_bounce = std::stoi(argv[3]);
+	}
+
+
+	float aspect_ratio = 16.0f / 9.0f;
 	int image_height = int(image_width / aspect_ratio);
 	image_height = (image_height < 1) ? 1 : image_height;
 
@@ -63,7 +76,7 @@ int main() {
 	// === Initialize entire scene with single kernel launch ===
 	initScene<<<1, 1>>>(
 						d_spheres, d_world, d_camera,
-						aspect_ratio, image_width, msaa_samples, max_bounce);
+						aspect_ratio, image_width, samples, max_bounce);
 	CUDA_CHECK(cudaGetLastError());
 	CUDA_CHECK(cudaDeviceSynchronize());
 
@@ -78,12 +91,13 @@ int main() {
 	std::clog << "Launching CUDA kernel with " << gridDim.x << "x" << gridDim.y << " blocks and " << blockDim.x << "x" << blockDim.y << " threads" << std::endl;
 
 	auto start = std::chrono::high_resolution_clock::now();
-	renderKernel<<<gridDim, blockDim>>>(d_camera, d_world, d_pixel_buffer, image_width, image_height, msaa_samples);
+	renderKernel<<<gridDim, blockDim>>>(d_camera, d_world, d_pixel_buffer, image_width, image_height, samples);
 	CUDA_CHECK(cudaGetLastError());
 	CUDA_CHECK(cudaDeviceSynchronize());
 	auto end = std::chrono::high_resolution_clock::now();
 
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+	std::clog << "Image resolution: " << image_width << "x" << image_height << std::endl;
 	std::clog << "Rendering time: " << duration.count() << " ms" << std::endl;
 
 	// === Copy result back to host ===
