@@ -1,1 +1,1 @@
-# accel-raytracer
+# Accelerated Ray Tracing
